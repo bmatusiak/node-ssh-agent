@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // -*- mode: js -*-
+process.stdin.pause();
 
 var getopt = require('posix-getopt');
 var path = require('path');
@@ -59,7 +60,10 @@ client.requestIdentities(function(err, keys) {
   var key = keys.filter(function (k) {
     return (k.comment === kname);
   }).pop();
-
+  
+  if(!key && keys.length == 1)
+    key = keys.pop();
+    
   if (!key)
     usage(kname + ' invalid', 1);
 
@@ -72,7 +76,10 @@ client.requestIdentities(function(err, keys) {
   });
 
   process.stdin.on('end', function () {
-    client.sign(key, new Buffer(data), function(err2, signature) {
+    // data = data.toString("utf8").trim();
+    
+    console.log("signing", data)
+    client.sign(key, Buffer.from(data), function(err2, signature) {
       if (err2) {
         console.error(err2.toString());
         process.exit(1);
